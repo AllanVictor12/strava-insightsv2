@@ -53,6 +53,9 @@ COPY server/ ./server/
 # Copiar configuração do supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Criar diretórios de logs
+RUN mkdir -p /var/log/supervisor /var/log/nginx
+
 # Expor porta
 EXPOSE 3000
 
