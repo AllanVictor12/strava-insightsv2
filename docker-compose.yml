@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  strava-insights:
+    image: strava-insights:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_HOST=${DB_HOST:-10.0.1.10}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-postgres}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD}
+    networks:
+      - Alanrede
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.strava-insights.rule=Host(`mtb.alanvictor.cloud`)
+        - traefik.http.routers.strava-insights.entrypoints=websecure
+        - traefik.http.routers.strava-insights.tls.certresolver=letsencryptresolver
+        - traefik.http.services.strava-insights.loadbalancer.server.port=3000
+
+networks:
+  Alanrede:
+    external: true
