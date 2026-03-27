@@ -1,315 +1,155 @@
 import { useMemo } from 'react';
 import { StravaActivity } from '@/types/activity';
-import { 
-  PieChart, 
-  Pie, 
-  Cell, 
-  ResponsiveContainer, 
-  Tooltip,
-  Legend
-} from 'recharts';
-import { format, getDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { ResponsivePie } from '@nivo/pie';
+import { getDay } from 'date-fns';
+import { darkTheme, CHART_PALETTE } from '@/lib/nivo-theme';
 
-interface ActivityTypeChartProps {
+interface ChartProps {
   activities: StravaActivity[];
 }
 
-const COLORS = [
-  'hsl(198, 93%, 59%)', // primary
-  'hsl(24, 100%, 50%)', // strava orange
-  'hsl(142, 71%, 45%)', // success green
-  'hsl(262, 83%, 58%)', // purple
-];
-
-const getActivityLabel = (type: string) => {
+const getActivityGroup = (type: string) => {
   switch (type) {
-    case 'MountainBikeRide': return 'MTB';
-    case 'Ride': return 'Estrada';
-    case 'Walk': return 'Caminhada';
-    case 'Run': return 'Corrida';
-    default: return type;
+    case 'MountainBikeRide':
+    case 'Ride':
+      return 'MTB';
+    case 'Walk':
+    case 'Run':
+      return 'Caminhada';
+    default:
+      return type;
   }
 };
 
-export const ActivityTypeChart = ({ activities }: ActivityTypeChartProps) => {
-  const data = useMemo(() => {
-    const counts: Record<string, number> = {};
-    activities.forEach(a => {
-      const type = a.sport_type;
-      counts[type] = (counts[type] || 0) + 1;
-    });
-    
-    return Object.entries(counts)
-      .map(([type, count]) => ({
-        name: getActivityLabel(type),
-        value: count,
-        percentage: ((count / activities.length) * 100).toFixed(1)
-      }))
-      .sort((a, b) => b.value - a.value);
-  }, [activities]);
-  
-  if (data.length === 0) {
-    return (
-      <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
-        <p className="text-muted-foreground">Sem dados para exibir</p>
-      </div>
-    );
-  }
-  
+function EmptyState() {
+  return (
+    <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
+      <p className="text-muted-foreground">Sem dados para exibir</p>
+    </div>
+  );
+}
+
+function DonutChart({ data, title }: { data: { id: string; label: string; value: number }[]; title: string }) {
+  if (data.length === 0) return <EmptyState />;
+
   return (
     <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Distribuição por Tipo de Atividade
-      </h3>
+      <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
       <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              label={({ name, percentage }) => `${name} (${percentage}%)`}
-              labelLine={false}
-            >
-              {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number) => [`${value} atividades`, 'Total']}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <ResponsivePie
+          data={data}
+          theme={darkTheme}
+          colors={CHART_PALETTE}
+          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          innerRadius={0.6}
+          padAngle={2}
+          cornerRadius={4}
+          activeOuterRadiusOffset={6}
+          borderWidth={0}
+          enableArcLinkLabels={true}
+          arcLinkLabelsSkipAngle={10}
+          arcLinkLabelsTextColor="hsl(215, 20%, 75%)"
+          arcLinkLabelsThickness={1.5}
+          arcLinkLabelsColor={{ from: 'color' }}
+          arcLinkLabelsDiagonalLength={12}
+          arcLinkLabelsStraightLength={8}
+          arcLabelsSkipAngle={20}
+          arcLabelsTextColor="hsl(222, 47%, 6%)"
+          arcLabel={(d) => `${((d.arc.angleDeg / 360) * 100).toFixed(0)}%`}
+          motionConfig="gentle"
+          transitionMode="pushIn"
+          tooltip={({ datum }) => (
+            <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: datum.color }} />
+                <span className="text-foreground font-medium text-sm">{datum.label}</span>
+              </div>
+              <p className="text-muted-foreground text-xs mt-1">
+                {datum.value} atividades ({((datum.arc.angleDeg / 360) * 100).toFixed(1)}%)
+              </p>
+            </div>
+          )}
+        />
       </div>
     </div>
   );
-};
-
-interface DistanceRangeChartProps {
-  activities: StravaActivity[];
 }
 
-export const DistanceRangeChart = ({ activities }: DistanceRangeChartProps) => {
+export const ActivityTypeChart = ({ activities }: ChartProps) => {
+  const data = useMemo(() => {
+    const counts: Record<string, number> = {};
+    activities.forEach(a => {
+      const group = getActivityGroup(a.sport_type);
+      counts[group] = (counts[group] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .map(([name, count]) => ({ id: name, label: name, value: count }))
+      .sort((a, b) => b.value - a.value);
+  }, [activities]);
+
+  return <DonutChart data={data} title="Distribuição por Tipo de Atividade" />;
+};
+
+export const DistanceRangeChart = ({ activities }: ChartProps) => {
   const data = useMemo(() => {
     const ranges = [
       { name: '< 20km', min: 0, max: 20 },
       { name: '20-40km', min: 20, max: 40 },
       { name: '40-60km', min: 40, max: 60 },
-      { name: '> 60km', min: 60, max: Infinity }
+      { name: '> 60km', min: 60, max: Infinity },
     ];
-    
-    return ranges.map(range => {
-      const count = activities.filter(a => {
-        const km = a.distance / 1000;
-        return km >= range.min && km < range.max;
-      }).length;
-      
-      return {
-        name: range.name,
-        value: count,
-        percentage: activities.length > 0 ? ((count / activities.length) * 100).toFixed(1) : '0'
-      };
-    }).filter(d => d.value > 0);
+
+    return ranges
+      .map(range => {
+        const count = activities.filter(a => {
+          const km = a.distance / 1000;
+          return km >= range.min && km < range.max;
+        }).length;
+        return { id: range.name, label: range.name, value: count };
+      })
+      .filter(d => d.value > 0);
   }, [activities]);
-  
-  if (data.length === 0) {
-    return (
-      <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
-        <p className="text-muted-foreground">Sem dados para exibir</p>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Distribuição por Faixa de Distância
-      </h3>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              label={({ name, percentage }) => `${name} (${percentage}%)`}
-              labelLine={false}
-            >
-              {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number) => [`${value} atividades`, 'Total']}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+
+  return <DonutChart data={data} title="Distribuição por Faixa de Distância" />;
 };
 
-interface WeekdayChartProps {
-  activities: StravaActivity[];
-}
-
-export const WeekdayChart = ({ activities }: WeekdayChartProps) => {
+export const WeekdayChart = ({ activities }: ChartProps) => {
   const data = useMemo(() => {
     const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
     const counts = new Array(7).fill(0);
-    
+
     activities.forEach(a => {
       const dayIndex = getDay(new Date(a.start_date_local));
       counts[dayIndex]++;
     });
-    
-    return days.map((name, index) => ({
-      name,
-      value: counts[index],
-      percentage: activities.length > 0 ? ((counts[index] / activities.length) * 100).toFixed(1) : '0'
-    })).filter(d => d.value > 0);
-  }, [activities]);
-  
-  if (data.length === 0) {
-    return (
-      <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
-        <p className="text-muted-foreground">Sem dados para exibir</p>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Frequência por Dia da Semana
-      </h3>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              label={({ name, percentage }) => `${name} (${percentage}%)`}
-              labelLine={false}
-            >
-              {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number) => [`${value} atividades`, 'Total']}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-};
 
-interface TimeOfDayChartProps {
-  activities: StravaActivity[];
-}
-
-export const TimeOfDayChart = ({ activities }: TimeOfDayChartProps) => {
-  const data = useMemo(() => {
-    const periods = [
-      { name: 'Manhã (5h-12h)', min: 5, max: 12 },
-      { name: 'Tarde (12h-18h)', min: 12, max: 18 },
-      { name: 'Noite (18h-22h)', min: 18, max: 22 },
-      { name: 'Madrugada', min: 22, max: 5 }
-    ];
-    
-    const counts: Record<string, number> = {};
-    periods.forEach(p => counts[p.name] = 0);
-    
-    activities.forEach(a => {
-      const hour = new Date(a.start_date_local).getHours();
-      if (hour >= 5 && hour < 12) counts['Manhã (5h-12h)']++;
-      else if (hour >= 12 && hour < 18) counts['Tarde (12h-18h)']++;
-      else if (hour >= 18 && hour < 22) counts['Noite (18h-22h)']++;
-      else counts['Madrugada']++;
-    });
-    
-    return Object.entries(counts)
-      .map(([name, value]) => ({
-        name,
-        value,
-        percentage: activities.length > 0 ? ((value / activities.length) * 100).toFixed(1) : '0'
-      }))
+    return days
+      .map((name, index) => ({ id: name, label: name, value: counts[index] }))
       .filter(d => d.value > 0);
   }, [activities]);
-  
-  if (data.length === 0) {
-    return (
-      <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
-        <p className="text-muted-foreground">Sem dados para exibir</p>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Distribuição por Horário
-      </h3>
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="50%"
-              cy="50%"
-              innerRadius={50}
-              outerRadius={80}
-              paddingAngle={2}
-              dataKey="value"
-              label={({ name, percentage }) => `${name.split(' ')[0]} (${percentage}%)`}
-              labelLine={false}
-            >
-              {data.map((_, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number) => [`${value} atividades`, 'Total']}
-            />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
+
+  return <DonutChart data={data} title="Frequência por Dia da Semana" />;
+};
+
+export const TimeOfDayChart = ({ activities }: ChartProps) => {
+  const data = useMemo(() => {
+    const periods = ['Manhã', 'Tarde', 'Noite', 'Madrugada'];
+    const counts: Record<string, number> = {};
+    periods.forEach(p => (counts[p] = 0));
+
+    activities.forEach(a => {
+      const hour = new Date(a.start_date_local).getHours();
+      if (hour >= 5 && hour < 12) counts['Manhã']++;
+      else if (hour >= 12 && hour < 18) counts['Tarde']++;
+      else if (hour >= 18 && hour < 22) counts['Noite']++;
+      else counts['Madrugada']++;
+    });
+
+    return Object.entries(counts)
+      .map(([name, value]) => ({ id: name, label: name, value }))
+      .filter(d => d.value > 0);
+  }, [activities]);
+
+  return <DonutChart data={data} title="Distribuição por Horário" />;
 };

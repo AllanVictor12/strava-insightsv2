@@ -1,18 +1,9 @@
 import { useMemo } from 'react';
 import { StravaActivity } from '@/types/activity';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Area,
-  AreaChart
-} from 'recharts';
-import { format, parseISO, startOfMonth, getMonth, getYear } from 'date-fns';
+import { ResponsiveLine } from '@nivo/line';
+import { format, getMonth, getYear } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { darkTheme, chartColors } from '@/lib/nivo-theme';
 
 interface SpeedEvolutionChartProps {
   activities: StravaActivity[];
@@ -20,89 +11,97 @@ interface SpeedEvolutionChartProps {
 
 export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) => {
   const data = useMemo(() => {
-    const sorted = [...activities]
-      .sort((a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime());
-    
-    // Média móvel de 5 atividades
-    return sorted.map((activity, index) => {
+    const sorted = [...activities].sort(
+      (a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime()
+    );
+
+    const speedPoints: { x: string; y: number }[] = [];
+    const avgPoints: { x: string; y: number }[] = [];
+
+    sorted.forEach((activity, index) => {
+      const label = format(new Date(activity.start_date_local), 'dd/MM', { locale: ptBR });
+      const speed = Number((activity.average_speed * 3.6).toFixed(1));
+
       const windowStart = Math.max(0, index - 4);
       const windowActivities = sorted.slice(windowStart, index + 1);
-      const avgSpeed = windowActivities.reduce((sum, a) => sum + a.average_speed * 3.6, 0) / windowActivities.length;
-      
-      return {
-        date: format(new Date(activity.start_date_local), 'dd/MM', { locale: ptBR }),
-        fullDate: format(new Date(activity.start_date_local), "dd 'de' MMM, yyyy", { locale: ptBR }),
-        speed: Number((activity.average_speed * 3.6).toFixed(1)),
-        avgSpeed: Number(avgSpeed.toFixed(1)),
-        name: activity.name
-      };
+      const avgSpeed = Number(
+        (windowActivities.reduce((sum, a) => sum + a.average_speed * 3.6, 0) / windowActivities.length).toFixed(1)
+      );
+
+      speedPoints.push({ x: label, y: speed });
+      avgPoints.push({ x: label, y: avgSpeed });
     });
+
+    return [
+      { id: 'Velocidade', data: speedPoints, color: chartColors.strava },
+      { id: 'Média Móvel', data: avgPoints, color: chartColors.primary },
+    ];
   }, [activities]);
-  
-  if (data.length === 0) {
+
+  if (activities.length === 0) {
     return (
       <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
         <p className="text-muted-foreground">Sem dados para exibir</p>
       </div>
     );
   }
-  
+
   return (
     <div className="rounded-xl bg-card border border-border p-6">
       <h3 className="text-sm font-medium text-muted-foreground mb-4">
         Evolução da Velocidade Média (Média Móvel 5 atividades)
       </h3>
       <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="speedGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(198, 93%, 59%)" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="hsl(198, 93%, 59%)" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 18%)" />
-            <XAxis 
-              dataKey="date" 
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={12}
-              tickLine={false}
-            />
-            <YAxis 
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={12}
-              tickLine={false}
-              tickFormatter={(value) => `${value} km/h`}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              labelFormatter={(_, payload) => payload[0]?.payload.fullDate || ''}
-              formatter={(value: number, name: string) => [
-                `${value} km/h`, 
-                name === 'avgSpeed' ? 'Média Móvel' : 'Velocidade'
-              ]}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="avgSpeed" 
-              stroke="hsl(198, 93%, 59%)" 
-              strokeWidth={2}
-              fill="url(#speedGradient)"
-            />
-            <Line 
-              type="monotone" 
-              dataKey="speed" 
-              stroke="hsl(24, 100%, 50%)" 
-              strokeWidth={1}
-              dot={false}
-              opacity={0.5}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <ResponsiveLine
+          data={data}
+          theme={darkTheme}
+          colors={[chartColors.strava, chartColors.primary]}
+          margin={{ top: 10, right: 20, bottom: 40, left: 55 }}
+          xScale={{ type: 'point' }}
+          yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
+          curve="catmullRom"
+          enableArea={true}
+          areaOpacity={0.08}
+          areaBaselineValue={0}
+          lineWidth={2}
+          pointSize={0}
+          enableGridX={false}
+          axisBottom={{
+            tickRotation: -45,
+            tickSize: 0,
+            tickPadding: 8,
+            truncateTickAt: 0,
+          }}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 8,
+            format: (v) => `${v} km/h`,
+          }}
+          enableSlices="x"
+          sliceTooltip={({ slice }) => (
+            <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+              {slice.points.map((point) => (
+                <div key={point.id} className="flex items-center gap-2 text-sm">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: point.serieColor }} />
+                  <span className="text-muted-foreground">{point.serieId}:</span>
+                  <span className="text-foreground font-medium">{point.data.yFormatted} km/h</span>
+                </div>
+              ))}
+            </div>
+          )}
+          motionConfig="gentle"
+          legends={[
+            {
+              anchor: 'top-right',
+              direction: 'row',
+              translateY: -5,
+              itemWidth: 100,
+              itemHeight: 20,
+              symbolSize: 10,
+              symbolShape: 'circle',
+            },
+          ]}
+        />
       </div>
     </div>
   );
@@ -115,76 +114,75 @@ interface MonthlyDistanceChartProps {
 export const MonthlyDistanceChart = ({ activities }: MonthlyDistanceChartProps) => {
   const data = useMemo(() => {
     const monthlyData: Record<string, number> = {};
-    
-    activities.forEach(activity => {
+
+    activities.forEach((activity) => {
       const date = new Date(activity.start_date_local);
       const key = `${getYear(date)}-${String(getMonth(date) + 1).padStart(2, '0')}`;
       monthlyData[key] = (monthlyData[key] || 0) + activity.distance / 1000;
     });
-    
-    return Object.entries(monthlyData)
+
+    const points = Object.entries(monthlyData)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, distance]) => {
         const [year, month] = key.split('-');
         return {
-          month: format(new Date(parseInt(year), parseInt(month) - 1), 'MMM yy', { locale: ptBR }),
-          distance: Number(distance.toFixed(1))
+          x: format(new Date(parseInt(year), parseInt(month) - 1), 'MMM yy', { locale: ptBR }),
+          y: Number(distance.toFixed(1)),
         };
       });
+
+    return [{ id: 'Distância', data: points }];
   }, [activities]);
-  
-  if (data.length === 0) {
+
+  if (activities.length === 0) {
     return (
       <div className="rounded-xl bg-card border border-border p-6 h-80 flex items-center justify-center">
         <p className="text-muted-foreground">Sem dados para exibir</p>
       </div>
     );
   }
-  
+
   return (
     <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Distância Mensal
-      </h3>
+      <h3 className="text-sm font-medium text-muted-foreground mb-4">Distância Mensal</h3>
       <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id="distanceGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(24, 100%, 50%)" stopOpacity={0.3}/>
-                <stop offset="95%" stopColor="hsl(24, 100%, 50%)" stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 18%)" />
-            <XAxis 
-              dataKey="month" 
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={12}
-              tickLine={false}
-            />
-            <YAxis 
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={12}
-              tickLine={false}
-              tickFormatter={(value) => `${value} km`}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number) => [`${value} km`, 'Distância']}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="distance" 
-              stroke="hsl(24, 100%, 50%)" 
-              strokeWidth={2}
-              fill="url(#distanceGradient)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
+        <ResponsiveLine
+          data={data}
+          theme={darkTheme}
+          colors={[chartColors.strava]}
+          margin={{ top: 10, right: 20, bottom: 40, left: 55 }}
+          xScale={{ type: 'point' }}
+          yScale={{ type: 'linear', min: 0, max: 'auto' }}
+          curve="catmullRom"
+          enableArea={true}
+          areaOpacity={0.12}
+          lineWidth={2.5}
+          pointSize={6}
+          pointColor={chartColors.strava}
+          pointBorderWidth={2}
+          pointBorderColor="hsl(222, 47%, 10%)"
+          enableGridX={false}
+          axisBottom={{
+            tickRotation: -45,
+            tickSize: 0,
+            tickPadding: 8,
+          }}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 8,
+            format: (v) => `${v} km`,
+          }}
+          useMesh={true}
+          tooltip={({ point }) => (
+            <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+              <p className="text-foreground font-medium text-sm">{point.data.x as string}</p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                <span style={{ color: chartColors.strava }}>{point.data.yFormatted} km</span>
+              </p>
+            </div>
+          )}
+          motionConfig="gentle"
+        />
       </div>
     </div>
   );

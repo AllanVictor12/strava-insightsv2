@@ -1,17 +1,9 @@
 import { useMemo } from 'react';
 import { StravaActivity } from '@/types/activity';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer,
-  Cell
-} from 'recharts';
+import { ResponsiveBar } from '@nivo/bar';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { darkTheme, chartColors } from '@/lib/nivo-theme';
 
 interface TopDistanceChartProps {
   activities: StravaActivity[];
@@ -22,15 +14,15 @@ export const TopDistanceChart = ({ activities }: TopDistanceChartProps) => {
     return [...activities]
       .sort((a, b) => b.distance - a.distance)
       .slice(0, 10)
-      .map(a => ({
-        name: a.name.length > 20 ? a.name.slice(0, 20) + '...' : a.name,
+      .map((a) => ({
+        id: a.name.length > 22 ? a.name.slice(0, 22) + '...' : a.name,
         fullName: a.name,
         distance: Number((a.distance / 1000).toFixed(1)),
-        date: format(new Date(a.start_date_local), "dd 'de' MMM", { locale: ptBR })
+        date: format(new Date(a.start_date_local), "dd 'de' MMM", { locale: ptBR }),
       }))
       .reverse();
   }, [activities]);
-  
+
   if (data.length === 0) {
     return (
       <div className="rounded-xl bg-card border border-border p-6 h-96 flex items-center justify-center">
@@ -38,53 +30,57 @@ export const TopDistanceChart = ({ activities }: TopDistanceChartProps) => {
       </div>
     );
   }
-  
+
   return (
     <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Top 10 Maiores Pedais
-      </h3>
+      <h3 className="text-sm font-medium text-muted-foreground mb-4">Top 10 Maiores Pedais</h3>
       <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 18%)" horizontal={false} />
-            <XAxis 
-              type="number"
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={12}
-              tickLine={false}
-              tickFormatter={(value) => `${value} km`}
-            />
-            <YAxis 
-              type="category"
-              dataKey="name"
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={11}
-              tickLine={false}
-              width={120}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number, _, props) => [
-                `${value} km`, 
-                props.payload.date
-              ]}
-              labelFormatter={(_, payload) => payload[0]?.payload.fullName || ''}
-            />
-            <Bar dataKey="distance" radius={[0, 4, 4, 0]}>
-              {data.map((_, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={`hsl(198, 93%, ${50 + (index * 3)}%)`} 
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ResponsiveBar
+          data={data}
+          keys={['distance']}
+          indexBy="id"
+          theme={darkTheme}
+          colors={chartColors.primary}
+          colorBy="indexValue"
+          margin={{ top: 5, right: 30, bottom: 5, left: 130 }}
+          layout="horizontal"
+          padding={0.25}
+          borderRadius={4}
+          borderWidth={0}
+          enableGridX={true}
+          enableGridY={false}
+          axisTop={null}
+          axisRight={null}
+          axisBottom={null}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 8,
+          }}
+          enableLabel={true}
+          label={(d) => `${d.value} km`}
+          labelSkipWidth={40}
+          labelTextColor="hsl(222, 47%, 6%)"
+          tooltip={({ data: d }) => (
+            <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+              <p className="text-foreground font-medium text-sm">{d.fullName as string}</p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                {d.distance} km &middot; {d.date as string}
+              </p>
+            </div>
+          )}
+          motionConfig="gentle"
+          defs={[
+            {
+              id: 'gradient-blue',
+              type: 'linearGradient',
+              colors: [
+                { offset: 0, color: 'hsl(198, 93%, 50%)' },
+                { offset: 100, color: 'hsl(198, 93%, 65%)' },
+              ],
+            },
+          ]}
+          fill={[{ match: '*', id: 'gradient-blue' }]}
+        />
       </div>
     </div>
   );
@@ -99,15 +95,15 @@ export const TopSpeedChart = ({ activities }: TopSpeedChartProps) => {
     return [...activities]
       .sort((a, b) => b.average_speed - a.average_speed)
       .slice(0, 10)
-      .map(a => ({
-        name: a.name.length > 20 ? a.name.slice(0, 20) + '...' : a.name,
+      .map((a) => ({
+        id: a.name.length > 22 ? a.name.slice(0, 22) + '...' : a.name,
         fullName: a.name,
         speed: Number((a.average_speed * 3.6).toFixed(1)),
-        date: format(new Date(a.start_date_local), "dd 'de' MMM", { locale: ptBR })
+        date: format(new Date(a.start_date_local), "dd 'de' MMM", { locale: ptBR }),
       }))
       .reverse();
   }, [activities]);
-  
+
   if (data.length === 0) {
     return (
       <div className="rounded-xl bg-card border border-border p-6 h-96 flex items-center justify-center">
@@ -115,53 +111,57 @@ export const TopSpeedChart = ({ activities }: TopSpeedChartProps) => {
       </div>
     );
   }
-  
+
   return (
     <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Top 10 Mais Rápidos
-      </h3>
+      <h3 className="text-sm font-medium text-muted-foreground mb-4">Top 10 Mais Rápidos</h3>
       <div className="h-80">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 47%, 18%)" horizontal={false} />
-            <XAxis 
-              type="number"
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={12}
-              tickLine={false}
-              tickFormatter={(value) => `${value} km/h`}
-            />
-            <YAxis 
-              type="category"
-              dataKey="name"
-              stroke="hsl(215, 20%, 65%)"
-              fontSize={11}
-              tickLine={false}
-              width={120}
-            />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(222, 47%, 10%)', 
-                border: '1px solid hsl(222, 47%, 18%)',
-                borderRadius: '8px'
-              }}
-              formatter={(value: number, _, props) => [
-                `${value} km/h`, 
-                props.payload.date
-              ]}
-              labelFormatter={(_, payload) => payload[0]?.payload.fullName || ''}
-            />
-            <Bar dataKey="speed" radius={[0, 4, 4, 0]}>
-              {data.map((_, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={`hsl(24, 100%, ${45 + (index * 3)}%)`} 
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <ResponsiveBar
+          data={data}
+          keys={['speed']}
+          indexBy="id"
+          theme={darkTheme}
+          colors={chartColors.strava}
+          colorBy="indexValue"
+          margin={{ top: 5, right: 30, bottom: 5, left: 130 }}
+          layout="horizontal"
+          padding={0.25}
+          borderRadius={4}
+          borderWidth={0}
+          enableGridX={true}
+          enableGridY={false}
+          axisTop={null}
+          axisRight={null}
+          axisBottom={null}
+          axisLeft={{
+            tickSize: 0,
+            tickPadding: 8,
+          }}
+          enableLabel={true}
+          label={(d) => `${d.value} km/h`}
+          labelSkipWidth={40}
+          labelTextColor="hsl(222, 47%, 6%)"
+          tooltip={({ data: d }) => (
+            <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
+              <p className="text-foreground font-medium text-sm">{d.fullName as string}</p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                {d.speed} km/h &middot; {d.date as string}
+              </p>
+            </div>
+          )}
+          motionConfig="gentle"
+          defs={[
+            {
+              id: 'gradient-orange',
+              type: 'linearGradient',
+              colors: [
+                { offset: 0, color: 'hsl(24, 100%, 42%)' },
+                { offset: 100, color: 'hsl(24, 100%, 58%)' },
+              ],
+            },
+          ]}
+          fill={[{ match: '*', id: 'gradient-orange' }]}
+        />
       </div>
     </div>
   );
