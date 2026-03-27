@@ -11,7 +11,12 @@ interface SpeedEvolutionChartProps {
 
 export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) => {
   const data = useMemo(() => {
-    const sorted = [...activities].sort(
+    // Filtrar apenas pedais (MTB e Ride)
+    const bikeOnly = activities.filter(
+      a => a.sport_type === 'MountainBikeRide' || a.sport_type === 'Ride'
+    );
+
+    const sorted = [...bikeOnly].sort(
       (a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime()
     );
 
@@ -49,7 +54,7 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
   return (
     <div className="rounded-xl bg-card border border-border p-6">
       <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Evolução da Velocidade Média (Média Móvel 5 atividades)
+        Evolução da Velocidade Média - Pedal (Média Móvel 5 atividades)
       </h3>
       <div className="h-72">
         <ResponsiveLine
@@ -82,8 +87,8 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
             <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
               {slice.points.map((point) => (
                 <div key={point.id} className="flex items-center gap-2 text-sm">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: point.serieColor }} />
-                  <span className="text-muted-foreground">{point.serieId}:</span>
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: point.seriesColor }} />
+                  <span className="text-muted-foreground">{point.seriesId}:</span>
                   <span className="text-foreground font-medium">{point.data.yFormatted} km/h</span>
                 </div>
               ))}
