@@ -7,7 +7,7 @@ const port = process.env.PORT || 3001;
 
 // Configuração do PostgreSQL
 const pool = new Pool({
-  host: process.env.DB_HOST || '10.0.1.10',
+  host: process.env.DB_HOST || 'postgres_postgres',
   port: process.env.DB_PORT || 5432,
   database: process.env.DB_NAME || 'postgres',
   user: process.env.DB_USER || 'postgres',

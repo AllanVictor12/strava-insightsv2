@@ -63,7 +63,7 @@ EXPOSE 3000
 # Variáveis de ambiente
 ENV NODE_ENV=production
 ENV PORT=3001
-ENV DB_HOST=10.0.1.10
+ENV DB_HOST=postgres_postgres
 ENV DB_PORT=5432
 ENV DB_NAME=postgres
 ENV DB_USER=postgres
