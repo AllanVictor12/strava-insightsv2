@@ -14,7 +14,7 @@ export interface StravaActivity {
   kudos_count: number;
 }
 
-export type ActivityType = 'all' | 'MountainBikeRide' | 'Ride' | 'Walk' | 'Run';
+export type ActivityType = 'all' | 'MTB' | 'Caminhada';
 
 export type DateFilter = 
   | 'today'

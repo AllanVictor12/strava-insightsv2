@@ -49,10 +49,8 @@ const dateFilterOptions: { value: DateFilter; label: string }[] = [
 
 const activityTypeOptions: { value: ActivityType; label: string }[] = [
   { value: 'all', label: 'Todas' },
-  { value: 'MountainBikeRide', label: 'MTB' },
-  { value: 'Ride', label: 'Pedal de Estrada' },
-  { value: 'Walk', label: 'Caminhada' },
-  { value: 'Run', label: 'Corrida' },
+  { value: 'MTB', label: 'MTB' },
+  { value: 'Caminhada', label: 'Caminhada' },
 ];
 
 const distanceOptions: { value: DistanceFilter; label: string }[] = [

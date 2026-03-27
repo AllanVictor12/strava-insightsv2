@@ -35,8 +35,8 @@ RUN npm install --production
 # ============================================
 FROM nginx:alpine
 
-# Instalar Node.js e supervisor
-RUN apk add --no-cache nodejs npm supervisor
+# Instalar Node.js
+RUN apk add --no-cache nodejs npm
 
 WORKDIR /app
 
@@ -50,11 +50,12 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=backend-builder /app/node_modules ./server/node_modules
 COPY server/ ./server/
 
-# Copiar configuração do supervisor
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# Verificar que o server tem node_modules
+RUN ls -la /app/server/ && node -e "require('/app/server/node_modules/express/package.json')" && echo "Express OK"
 
-# Criar diretórios de logs
-RUN mkdir -p /var/log/supervisor /var/log/nginx
+# Copiar entrypoint
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 # Expor porta
 EXPOSE 3000
@@ -67,5 +68,5 @@ ENV DB_PORT=5432
 ENV DB_NAME=postgres
 ENV DB_USER=postgres
 
-# Iniciar supervisor (gerencia nginx + node)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Iniciar nginx + API
+CMD ["/entrypoint.sh"]

@@ -95,9 +95,15 @@ export const useActivities = (filters: FilterState) => {
         return false;
       }
 
-      // Filtro de tipo
-      if (filters.activityType !== 'all' && activity.sport_type !== filters.activityType) {
-        return false;
+      // Filtro de tipo (agrupado)
+      if (filters.activityType === 'MTB') {
+        if (activity.sport_type !== 'MountainBikeRide' && activity.sport_type !== 'Ride') {
+          return false;
+        }
+      } else if (filters.activityType === 'Caminhada') {
+        if (activity.sport_type !== 'Walk' && activity.sport_type !== 'Run') {
+          return false;
+        }
       }
 
       // Filtro de distância (em km)
