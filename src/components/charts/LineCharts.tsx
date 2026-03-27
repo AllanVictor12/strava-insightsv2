@@ -20,12 +20,10 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
       (a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime()
     );
 
-    const speedPoints: { x: string; y: number }[] = [];
     const avgPoints: { x: string; y: number }[] = [];
 
     sorted.forEach((activity, index) => {
       const label = format(new Date(activity.start_date_local), 'dd/MM', { locale: ptBR });
-      const speed = Number((activity.average_speed * 3.6).toFixed(1));
 
       const windowStart = Math.max(0, index - 4);
       const windowActivities = sorted.slice(windowStart, index + 1);
@@ -33,13 +31,11 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
         (windowActivities.reduce((sum, a) => sum + a.average_speed * 3.6, 0) / windowActivities.length).toFixed(1)
       );
 
-      speedPoints.push({ x: label, y: speed });
       avgPoints.push({ x: label, y: avgSpeed });
     });
 
     return [
-      { id: 'Velocidade', data: speedPoints, color: chartColors.strava },
-      { id: 'Média Móvel', data: avgPoints, color: chartColors.primary },
+      { id: 'Velocidade Média', data: avgPoints },
     ];
   }, [activities]);
 
@@ -54,22 +50,23 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
   return (
     <div className="rounded-xl bg-card border border-border p-6">
       <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Evolução da Velocidade Média - Pedal (Média Móvel 5 atividades)
+        Evolução da Velocidade Média - Pedal
       </h3>
       <div className="h-72">
         <ResponsiveLine
           data={data}
           theme={darkTheme}
-          colors={[chartColors.strava, chartColors.primary]}
+          colors={[chartColors.strava]}
           margin={{ top: 10, right: 20, bottom: 40, left: 55 }}
           xScale={{ type: 'point' }}
-          yScale={{ type: 'linear', min: 'auto', max: 'auto', stacked: false }}
+          yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
           curve="catmullRom"
           enableArea={true}
-          areaOpacity={0.08}
-          areaBaselineValue={0}
-          lineWidth={2}
-          pointSize={0}
+          areaOpacity={0.1}
+          lineWidth={2.5}
+          pointSize={4}
+          pointColor={chartColors.strava}
+          pointBorderWidth={0}
           enableGridX={false}
           axisBottom={{
             tickRotation: -45,
@@ -82,30 +79,16 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
             tickPadding: 8,
             format: (v) => `${v} km/h`,
           }}
-          enableSlices="x"
-          sliceTooltip={({ slice }) => (
+          useMesh={true}
+          tooltip={({ point }) => (
             <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
-              {slice.points.map((point) => (
-                <div key={point.id} className="flex items-center gap-2 text-sm">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: point.seriesColor }} />
-                  <span className="text-muted-foreground">{point.seriesId}:</span>
-                  <span className="text-foreground font-medium">{point.data.yFormatted} km/h</span>
-                </div>
-              ))}
+              <p className="text-foreground font-medium text-sm">{point.data.x as string}</p>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                <span style={{ color: chartColors.strava }}>{point.data.yFormatted} km/h</span>
+              </p>
             </div>
           )}
           motionConfig="gentle"
-          legends={[
-            {
-              anchor: 'top-right',
-              direction: 'row',
-              translateY: -5,
-              itemWidth: 100,
-              itemHeight: 20,
-              symbolSize: 10,
-              symbolShape: 'circle',
-            },
-          ]}
         />
       </div>
     </div>
