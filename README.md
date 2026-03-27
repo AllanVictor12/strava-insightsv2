@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# Strava Insights - MTB Dashboard
 
-## Project info
+Dashboard pessoal para visualizar e analisar atividades do Strava, com foco em Mountain Bike.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**Live**: [mtb.alanvictor.cloud](https://mtb.alanvictor.cloud)
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Conexao com a API do Strava (OAuth2)
+- KPIs: distancia total, tempo, elevacao, velocidade media/maxima, potencia, kudos
+- Recordes pessoais (maior distancia, maior velocidade, maior elevacao, etc.)
+- Graficos interativos com Nivo:
+  - Evolucao da velocidade media mensal (pedal)
+  - Distancia mensal
+  - Top 10 maiores pedais
+  - Top 10 mais rapidos
+  - Distribuicao por tipo de atividade
+  - Distancia vs Velocidade (scatter com elevacao)
+  - Heatmap de atividades por dia
+- Filtros por tipo de atividade (MTB, Caminhada) e periodo
+- Tema dark otimizado
+- Responsivo (mobile-first)
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- **Frontend**: React 19 + TypeScript + Vite 6
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Charts**: Nivo (bar, line, pie, scatter, calendar)
+- **Backend**: Express + PostgreSQL (cache de atividades)
+- **Deploy**: Docker (Alpine) + Nginx + Traefik (Docker Swarm)
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Desenvolvimento Local
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Instalar dependencias
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Rodar em dev
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Variaveis de ambiente necessarias:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```env
+VITE_STRAVA_CLIENT_ID=
+VITE_STRAVA_CLIENT_SECRET=
+VITE_STRAVA_REDIRECT_URI=
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=strava
+DB_USER=strava
+DB_PASSWORD=
+```
 
-**Use GitHub Codespaces**
+## Deploy (Docker Swarm)
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+docker build -t strava-insights .
+docker stack deploy -c docker-compose.yml strava
+```
 
-## What technologies are used for this project?
+## Autor
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+**Alan Victor** - [github.com/AllanVictor12](https://github.com/AllanVictor12)
