@@ -59,7 +59,7 @@ export const TopDistanceChart = ({ activities }: TopDistanceChartProps) => {
           enableLabel={true}
           label={(d) => `${d.value} km`}
           labelSkipWidth={40}
-          labelTextColor="hsl(222, 47%, 6%)"
+          labelTextColor="hsl(0, 0%, 100%)"
           tooltip={({ data: d }) => (
             <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
               <p className="text-foreground font-medium text-sm">{d.fullName as string}</p>
@@ -140,7 +140,7 @@ export const TopSpeedChart = ({ activities }: TopSpeedChartProps) => {
           enableLabel={true}
           label={(d) => `${d.value} km/h`}
           labelSkipWidth={40}
-          labelTextColor="hsl(222, 47%, 6%)"
+          labelTextColor="hsl(0, 0%, 100%)"
           tooltip={({ data: d }) => (
             <div className="bg-card border border-border rounded-lg px-3 py-2 shadow-lg">
               <p className="text-foreground font-medium text-sm">{d.fullName as string}</p>

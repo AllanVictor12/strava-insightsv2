@@ -48,13 +48,13 @@ function DonutChart({ data, title }: { data: { id: string; label: string; value:
           borderWidth={0}
           enableArcLinkLabels={true}
           arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="hsl(215, 20%, 75%)"
+          arcLinkLabelsTextColor="hsl(0, 0%, 80%)"
           arcLinkLabelsThickness={1.5}
           arcLinkLabelsColor={{ from: 'color' }}
           arcLinkLabelsDiagonalLength={12}
           arcLinkLabelsStraightLength={8}
           arcLabelsSkipAngle={20}
-          arcLabelsTextColor="hsl(222, 47%, 6%)"
+          arcLabelsTextColor="hsl(0, 0%, 100%)"
           arcLabel={(d) => `${((d.arc.angleDeg / 360) * 100).toFixed(0)}%`}
           motionConfig="gentle"
           transitionMode="pushIn"

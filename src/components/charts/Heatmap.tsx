@@ -18,10 +18,19 @@ interface ActivityHeatmapProps {
 }
 
 export const ActivityHeatmap = ({ activities }: ActivityHeatmapProps) => {
+  const targetYear = useMemo(() => {
+    if (activities.length === 0) return new Date().getFullYear();
+    const years = activities.map(a => new Date(a.start_date_local).getFullYear());
+    // Use the most common year in the filtered data
+    const counts: Record<number, number> = {};
+    years.forEach(y => { counts[y] = (counts[y] || 0) + 1; });
+    return Number(Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]);
+  }, [activities]);
+
   const data = useMemo(() => {
-    const now = new Date();
-    const yearStart = startOfYear(now);
-    const yearEnd = endOfYear(now);
+    const ref = new Date(targetYear, 0, 1);
+    const yearStart = startOfYear(ref);
+    const yearEnd = endOfYear(ref);
     
     const allDays = eachDayOfInterval({ start: yearStart, end: yearEnd });
     
@@ -66,7 +75,7 @@ export const ActivityHeatmap = ({ activities }: ActivityHeatmapProps) => {
     }
     
     return weeks;
-  }, [activities]);
+  }, [activities, targetYear]);
   
   const getColor = (count: number) => {
     if (count === -1) return 'bg-transparent';
@@ -82,7 +91,7 @@ export const ActivityHeatmap = ({ activities }: ActivityHeatmapProps) => {
   return (
     <div className="rounded-xl bg-card border border-border p-6">
       <h3 className="text-sm font-medium text-muted-foreground mb-4">
-        Calendário de Atividades ({new Date().getFullYear()})
+        Calendário de Atividades ({targetYear})
       </h3>
       
       <div className="overflow-x-auto">
