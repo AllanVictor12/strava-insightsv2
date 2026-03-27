@@ -48,16 +48,16 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
       <h3 className="text-sm font-medium text-muted-foreground mb-4">
         Evolução da Velocidade Média - Pedal
       </h3>
-      <div className="h-72">
+      <div className="h-56 sm:h-72">
         <ResponsiveLine
           data={data}
           theme={darkTheme}
           colors={[chartColors.strava]}
-          margin={{ top: 10, right: 20, bottom: 40, left: 55 }}
+          margin={{ top: 10, right: 10, bottom: 40, left: 45 }}
           xScale={{ type: 'point' }}
           yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
           curve="catmullRom"
@@ -132,14 +132,14 @@ export const MonthlyDistanceChart = ({ activities }: MonthlyDistanceChartProps) 
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
       <h3 className="text-sm font-medium text-muted-foreground mb-4">Distância Mensal</h3>
-      <div className="h-72">
+      <div className="h-56 sm:h-72">
         <ResponsiveLine
           data={data}
           theme={darkTheme}
           colors={[chartColors.strava]}
-          margin={{ top: 10, right: 20, bottom: 40, left: 55 }}
+          margin={{ top: 10, right: 10, bottom: 40, left: 45 }}
           xScale={{ type: 'point' }}
           yScale={{ type: 'linear', min: 0, max: 'auto' }}
           curve="catmullRom"

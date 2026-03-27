@@ -40,13 +40,13 @@ const KPICard = ({ title, value, subtitle, icon, accentColor = 'primary' }: KPIC
   };
   
   return (
-    <div className="relative overflow-hidden rounded-xl bg-card border border-border p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-lg group">
-      <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />
-      
+    <div className="relative overflow-hidden rounded-xl bg-card border border-border p-3 sm:p-4 transition-all duration-300 hover:border-primary/50 hover:shadow-lg group">
+      <div className="absolute top-0 right-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full" />
+
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">{title}</p>
-          <p className={cn("text-2xl font-bold", colorClasses[accentColor])}>
+        <div className="space-y-0.5 sm:space-y-1 min-w-0">
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">{title}</p>
+          <p className={cn("text-lg sm:text-2xl font-bold", colorClasses[accentColor])}>
             {value}
           </p>
           {subtitle && (
@@ -129,7 +129,7 @@ export const KPICards = ({ stats }: KPICardsProps) => {
   ];
   
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
       {kpis.map((kpi, index) => (
         <KPICard key={index} {...kpi} />
       ))}

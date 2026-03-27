@@ -33,18 +33,18 @@ export const PersonalRecords = ({ records }: PersonalRecordsProps) => {
   }
   
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <div className="flex items-center gap-2 mb-6">
+    <div className="rounded-xl bg-card border border-border p-4 sm:p-6">
+      <div className="flex items-center gap-2 mb-4 sm:mb-6">
         <Trophy className="w-5 h-5 text-secondary" />
-        <h2 className="text-lg font-semibold text-foreground">Recordes Pessoais</h2>
+        <h2 className="text-base sm:text-lg font-semibold text-foreground">Recordes Pessoais</h2>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
         {records.map((record, index) => (
           <div 
             key={index}
             className={cn(
-              "relative overflow-hidden rounded-lg p-4",
+              "relative overflow-hidden rounded-lg p-3 sm:p-4",
               "bg-gradient-to-br from-muted/30 to-muted/10",
               "border border-border/50 hover:border-secondary/50",
               "transition-all duration-300 hover:scale-105"
@@ -58,7 +58,7 @@ export const PersonalRecords = ({ records }: PersonalRecordsProps) => {
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 {record.title}
               </p>
-              <p className="text-2xl font-bold text-secondary">
+              <p className="text-lg sm:text-2xl font-bold text-secondary">
                 {record.value}
               </p>
               <div className="pt-2 border-t border-border/50">

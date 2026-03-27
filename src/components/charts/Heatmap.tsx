@@ -89,8 +89,8 @@ export const ActivityHeatmap = ({ activities }: ActivityHeatmapProps) => {
   const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
+      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-3 sm:mb-4">
         Calendário de Atividades ({targetYear})
       </h3>
       

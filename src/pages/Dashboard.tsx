@@ -54,50 +54,50 @@ const Dashboard = () => {
             isRefreshing={isRefreshing}
           />
           
-          <main className="p-4 lg:p-6 space-y-6">
+          <main className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
             {/* KPIs */}
             <section>
               <KPICards stats={stats} />
             </section>
-            
+
             {/* Heatmap */}
             <section>
               <ActivityHeatmap activities={activities} />
             </section>
-            
+
             {/* Personal Records */}
             <section>
               <PersonalRecords records={personalRecords} />
             </section>
-            
+
             {/* Charts Row 1 - Line Charts */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               <SpeedEvolutionChart activities={activities} />
               <MonthlyDistanceChart activities={activities} />
             </section>
-            
+
             {/* Charts Row 2 - Pie Charts */}
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
               <ActivityTypeChart activities={activities} />
               <DistanceRangeChart activities={activities} />
               <WeekdayChart activities={activities} />
               <TimeOfDayChart activities={activities} />
             </section>
-            
+
             {/* Charts Row 3 - Bar Charts + Scatter */}
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
               <TopDistanceChart activities={activities} />
               <TopSpeedChart activities={activities} />
               <DistanceSpeedScatter activities={activities} />
             </section>
-            
+
             {/* Activities Table */}
             <section>
               <ActivitiesTable activities={activities} />
             </section>
-            
+
             {/* Footer */}
-            <footer className="text-center py-6 text-sm text-muted-foreground">
+            <footer className="text-center py-4 sm:py-6 text-sm text-muted-foreground">
               <p>MTB Dashboard • Dados do Strava</p>
             </footer>
           </main>

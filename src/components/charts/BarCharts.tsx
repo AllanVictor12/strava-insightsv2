@@ -15,7 +15,7 @@ export const TopDistanceChart = ({ activities }: TopDistanceChartProps) => {
       .sort((a, b) => b.distance - a.distance)
       .slice(0, 10)
       .map((a) => ({
-        id: a.name.length > 22 ? a.name.slice(0, 22) + '...' : a.name,
+        id: a.name.length > 16 ? a.name.slice(0, 16) + '...' : a.name,
         fullName: a.name,
         distance: Number((a.distance / 1000).toFixed(1)),
         date: format(new Date(a.start_date_local), "dd 'de' MMM", { locale: ptBR }),
@@ -32,9 +32,9 @@ export const TopDistanceChart = ({ activities }: TopDistanceChartProps) => {
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">Top 10 Maiores Pedais</h3>
-      <div className="h-80">
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
+      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-4">Top 10 Maiores Pedais</h3>
+      <div className="h-64 sm:h-80">
         <ResponsiveBar
           data={data}
           keys={['distance']}
@@ -42,7 +42,7 @@ export const TopDistanceChart = ({ activities }: TopDistanceChartProps) => {
           theme={darkTheme}
           colors={chartColors.primary}
           colorBy="indexValue"
-          margin={{ top: 5, right: 30, bottom: 5, left: 130 }}
+          margin={{ top: 5, right: 20, bottom: 5, left: 100 }}
           layout="horizontal"
           padding={0.25}
           borderRadius={4}
@@ -96,7 +96,7 @@ export const TopSpeedChart = ({ activities }: TopSpeedChartProps) => {
       .sort((a, b) => b.average_speed - a.average_speed)
       .slice(0, 10)
       .map((a) => ({
-        id: a.name.length > 22 ? a.name.slice(0, 22) + '...' : a.name,
+        id: a.name.length > 16 ? a.name.slice(0, 16) + '...' : a.name,
         fullName: a.name,
         speed: Number((a.average_speed * 3.6).toFixed(1)),
         date: format(new Date(a.start_date_local), "dd 'de' MMM", { locale: ptBR }),
@@ -113,9 +113,9 @@ export const TopSpeedChart = ({ activities }: TopSpeedChartProps) => {
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-4">Top 10 Mais Rápidos</h3>
-      <div className="h-80">
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
+      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-4">Top 10 Mais Rápidos</h3>
+      <div className="h-64 sm:h-80">
         <ResponsiveBar
           data={data}
           keys={['speed']}
@@ -123,7 +123,7 @@ export const TopSpeedChart = ({ activities }: TopSpeedChartProps) => {
           theme={darkTheme}
           colors={chartColors.strava}
           colorBy="indexValue"
-          margin={{ top: 5, right: 30, bottom: 5, left: 130 }}
+          margin={{ top: 5, right: 20, bottom: 5, left: 100 }}
           layout="horizontal"
           padding={0.25}
           borderRadius={4}

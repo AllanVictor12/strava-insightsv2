@@ -28,15 +28,15 @@ export const DistanceSpeedScatter = ({ activities }: DistanceSpeedScatterProps) 
   }
 
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-2">Distância vs Velocidade</h3>
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
+      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Distância vs Velocidade</h3>
       <p className="text-xs text-muted-foreground mb-4">Tamanho do ponto = elevação</p>
-      <div className="h-80">
+      <div className="h-64 sm:h-80">
         <ResponsiveScatterPlot
           data={data}
           theme={darkTheme}
           colors={[chartColors.primary]}
-          margin={{ top: 10, right: 20, bottom: 50, left: 60 }}
+          margin={{ top: 10, right: 10, bottom: 50, left: 50 }}
           xScale={{ type: 'linear', min: 'auto', max: 'auto' }}
           yScale={{ type: 'linear', min: 'auto', max: 'auto' }}
           nodeSize={(d) => {

@@ -33,20 +33,20 @@ function DonutChart({ data, title }: { data: { id: string; label: string; value:
   if (data.length === 0) return <EmptyState />;
 
   return (
-    <div className="rounded-xl bg-card border border-border p-6">
-      <h3 className="text-sm font-medium text-muted-foreground mb-2">{title}</h3>
-      <div className="h-64">
+    <div className="rounded-xl bg-card border border-border p-3 sm:p-6">
+      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2 truncate">{title}</h3>
+      <div className="h-44 sm:h-64">
         <ResponsivePie
           data={data}
           theme={darkTheme}
           colors={CHART_PALETTE}
-          margin={{ top: 20, right: 20, bottom: 20, left: 20 }}
+          margin={{ top: 15, right: 15, bottom: 15, left: 15 }}
           innerRadius={0.6}
           padAngle={2}
           cornerRadius={4}
           activeOuterRadiusOffset={6}
           borderWidth={0}
-          enableArcLinkLabels={true}
+          enableArcLinkLabels={false}
           arcLinkLabelsSkipAngle={10}
           arcLinkLabelsTextColor="hsl(0, 0%, 80%)"
           arcLinkLabelsThickness={1.5}
