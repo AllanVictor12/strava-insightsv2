@@ -16,27 +16,27 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
       a => a.sport_type === 'MountainBikeRide' || a.sport_type === 'Ride'
     );
 
-    const sorted = [...bikeOnly].sort(
-      (a, b) => new Date(a.start_date_local).getTime() - new Date(b.start_date_local).getTime()
-    );
-
-    const avgPoints: { x: string; y: number }[] = [];
-
-    sorted.forEach((activity, index) => {
-      const label = format(new Date(activity.start_date_local), 'dd/MM', { locale: ptBR });
-
-      const windowStart = Math.max(0, index - 4);
-      const windowActivities = sorted.slice(windowStart, index + 1);
-      const avgSpeed = Number(
-        (windowActivities.reduce((sum, a) => sum + a.average_speed * 3.6, 0) / windowActivities.length).toFixed(1)
-      );
-
-      avgPoints.push({ x: label, y: avgSpeed });
+    // Agregar por mês
+    const monthlySpeed: Record<string, { total: number; count: number }> = {};
+    bikeOnly.forEach(a => {
+      const date = new Date(a.start_date_local);
+      const key = `${getYear(date)}-${String(getMonth(date) + 1).padStart(2, '0')}`;
+      if (!monthlySpeed[key]) monthlySpeed[key] = { total: 0, count: 0 };
+      monthlySpeed[key].total += a.average_speed * 3.6;
+      monthlySpeed[key].count++;
     });
 
-    return [
-      { id: 'Velocidade Média', data: avgPoints },
-    ];
+    const points = Object.entries(monthlySpeed)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, { total, count }]) => {
+        const [year, month] = key.split('-');
+        return {
+          x: format(new Date(parseInt(year), parseInt(month) - 1), 'MMM yy', { locale: ptBR }),
+          y: Number((total / count).toFixed(1)),
+        };
+      });
+
+    return [{ id: 'Velocidade Média', data: points }];
   }, [activities]);
 
   if (activities.length === 0) {
@@ -64,9 +64,10 @@ export const SpeedEvolutionChart = ({ activities }: SpeedEvolutionChartProps) =>
           enableArea={true}
           areaOpacity={0.1}
           lineWidth={2.5}
-          pointSize={4}
+          pointSize={6}
           pointColor={chartColors.strava}
-          pointBorderWidth={0}
+          pointBorderWidth={2}
+          pointBorderColor="hsl(0, 0%, 7%)"
           enableGridX={false}
           axisBottom={{
             tickRotation: -45,
